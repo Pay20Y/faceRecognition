@@ -1,6 +1,6 @@
 import face_recognition
 import os
-import numpy
+from numpy import *
 
 # Often instead of just checking if two faces match or not (True or False), it's helpful to see how similar they are.
 # You can do that by using the face_distance function.
@@ -40,19 +40,17 @@ def writeEncodings(face_Dict):
 		length2 = len(face_recognition.face_encodings(image2))
 
 		if (length1 == 0 and length2 != 0):
-			image1_encoding = numpy.zeros(128)
+			image1_encoding = zeros(128)
 			image2_encoding = face_recognition.face_encodings(image2)[0]
 		elif (length2 == 0 and length1 != 0):
 			image1_encoding = face_recognition.face_encodings(image1)[0]
-			image2_encoding = numpy.zeros(128)
+			image2_encoding = zeros(128)
 		else:
 			image1_encoding = face_recognition.face_encodings(image1)[0]
 			image2_encoding = face_recognition.face_encodings(image2)[0]
 		# print image1_encoding
 		# print image2_encoding
 		f = open("faceEncoding.txt","a")
-		# f.writelines(str(image1_encoding))
-		# f.writelines(str(image2_encoding))
 		for element in image1_encoding:
 			element_str = str(element)
 			f.write(element_str + " ")
@@ -62,22 +60,30 @@ def writeEncodings(face_Dict):
 			f.write(element_str + " ")
 		f.write("\n")
 		count = count + 1
-		'''		
-		f = open("faceEncoding.txt","w")
-		for element in image1_encoding:
-			element = float(element)
-			f.write(str(element))
-			f.write(" ")
-		f.write("\n")
-		for element	in image2_encoding:
-			element = float(str(element))
-			f.write(element)
-			f.write(" ")
-		f.write("\n")
-		'''
-		# f.write(image1_encoding + "\t" + image2_encoding + "\n")
-# for k in faceDict:
-    # print "faceDict[%s] =" % k,faceDict[k]
+		f.close()
+
+def getDistance():
+	encodingMat = []
+	encodeFile = open("faceEncoding.txt","r")
+	line = encodeFile.readline()
+	while line:
+		temp = line.split(" ")
+		temp = temp[:128]
+		encodingMat.append(temp)
+		line = encodeFile.readline()
+	encodeFile.close()
+	# print "encodingMat's size is: ",len(encodingMat)
+	# print len(encodingMat[0])
+
+	innerDis_list = []
+
+	for i in range(len(encodingMat) - 1):
+		attr1 = [encodingMat[i]]
+		attr2 = [encodingMat[i+1]]
+		inner_face_distance = face_recognition.face_distance(attr1,attr2)
+		innerDis_list.append(inner_face_distance[0])
+
+	print innerDis_list
 
 
 def execute():
