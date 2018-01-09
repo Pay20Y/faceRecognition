@@ -1,5 +1,6 @@
 import face_recognition
 import os
+import numpy
 
 # Often instead of just checking if two faces match or not (True or False), it's helpful to see how similar they are.
 # You can do that by using the face_distance function.
@@ -13,21 +14,77 @@ import os
 
 # Load some images to compare against
 
-faceDict = {}
-for filename in os.listdir('../../data/shrinkLFW/'):
-	temp = filename.split('.')
-	front = temp[0]
-	personName = front[:-5]
-	if not faceDict.has_key(personName):
-		file1 = personName+'_0001.jpg'
-		file2 = personName+'_0002.jpg'
-		faceDict[personName] = [file1,file2]
-print 'faceDict size is: ',len(faceDict)
+def file2dict():
+	print "Now set the file_info in dict..."
+	faceDict = {}
+	for filename in os.listdir('../../data/shrinkLFW/'):
+		temp = filename.split('.')
+		front = temp[0]
+		personName = front[:-5]
+		if not faceDict.has_key(personName):
+			file1 = personName+'_0001.jpg'
+			file2 = personName+'_0002.jpg'
+			faceDict[personName] = [file1,file2]
+	print 'faceDict size is: ',len(faceDict)
+	return faceDict
 
+def writeEncodings(face_Dict):
+	count = 1
+	print "Now get image_encoding then write 2 file..."
+	for faceKey in face_Dict:
+		print 'now calc No.%d, %s' %(count,faceKey)
+		image1 = face_recognition.load_image_file("../../data/shrinkLFW/" + face_Dict[faceKey][0])
+		image2 = face_recognition.load_image_file("../../data/shrinkLFW/" + face_Dict[faceKey][1])
+
+		length1 = len(face_recognition.face_encodings(image1))
+		length2 = len(face_recognition.face_encodings(image2))
+
+		if (length1 == 0 and length2 != 0):
+			image1_encoding = numpy.zeros(128)
+			image2_encoding = face_recognition.face_encodings(image2)[0]
+		elif (length2 == 0 and length1 != 0):
+			image1_encoding = face_recognition.face_encodings(image1)[0]
+			image2_encoding = numpy.zeros(128)
+		else:
+			image1_encoding = face_recognition.face_encodings(image1)[0]
+			image2_encoding = face_recognition.face_encodings(image2)[0]
+		# print image1_encoding
+		# print image2_encoding
+		f = open("faceEncoding.txt","a")
+		# f.writelines(str(image1_encoding))
+		# f.writelines(str(image2_encoding))
+		for element in image1_encoding:
+			element_str = str(element)
+			f.write(element_str + " ")
+		f.write("\n")
+		for element in image2_encoding:
+			element_str = str(element)
+			f.write(element_str + " ")
+		f.write("\n")
+		count = count + 1
+		'''		
+		f = open("faceEncoding.txt","w")
+		for element in image1_encoding:
+			element = float(element)
+			f.write(str(element))
+			f.write(" ")
+		f.write("\n")
+		for element	in image2_encoding:
+			element = float(str(element))
+			f.write(element)
+			f.write(" ")
+		f.write("\n")
+		'''
+		# f.write(image1_encoding + "\t" + image2_encoding + "\n")
 # for k in faceDict:
     # print "faceDict[%s] =" % k,faceDict[k]
 
+
+def execute():
+	faceDict = file2dict()
+	writeEncodings(faceDict)
 # clac inner class
+'''
 count = 0
 times_innner = 0.0
 countReg = 0
@@ -40,7 +97,7 @@ for face in faceDict:
 	length1 = len(face_recognition.face_encodings(image1))
 	length2 = len(face_recognition.face_encodings(image2))
 
-	if length1 == 0 or length2 == 0:
+	if (length1 == 0 or length2 == 0):
 		continue;
 
 	image1_encoding = face_recognition.face_encodings(image1)[0]
@@ -60,24 +117,20 @@ for face in faceDict:
 			length1_compare = len(face_recognition.face_encodings(image1_compare))
 			length2_compare = len(face_recognition.face_encodings(image2_compare))
 
-			if length1_compare == 0 or length2_compare == 0:
+			if (length1_compare == 0 or length2_compare == 0):
 				continue
 
-			compare_image1_encoding = face_recognition.face_encodings(image1_compare)[0]
+			# compare_image1_encoding = face_recognition.face_encodings(image1_compare)[0]
 			compare_image2_encoding = face_recognition.face_encodings(image2_compare)[0]
 
-			face_distances1 = face_recognition.face_distance(outter_encoding,compare_image1_encoding)
-			face_distances2 = face_recognition.face_distance(outter_encoding,compare_image2_encoding)
+			# face_distances1 = face_recognition.face_distance(outter_encoding,compare_image1_encoding)
+			face_distances2 = face_recognition.face_distance(inner_encoding,compare_image2_encoding)
 
-			times_outter = times_outter + 8
-			if face_distances1[0] < 0.6:
-				countReg = countReg + 1
-			if face_distances1[1] < 0.6:
-				countReg = countReg + 1
+			times_outter = times_outter + 1
+			
 			if face_distances2[0] < 0.6:
 				countReg = countReg + 1
-			if face_distances2[1] < 0.6:
-				countReg = countReg + 1
+
 	if face_distances[0] > 0.6:
 		count = count + 1
 
@@ -85,4 +138,5 @@ FNMR = count / times_innner
 print "after %f times match test,FNMR = " %times_innner,FNMR
 
 FMR = countReg / 39600.0
-print "after %f times match test,FMR = " %times_outter,FMR
+print "after %f times match test,FMR  = " %times_outter,FMR
+'''
