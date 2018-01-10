@@ -28,9 +28,12 @@ def file2dict():
 	print 'faceDict size is: ',len(faceDict)
 	return faceDict
 
-def writeEncodings(face_Dict):
+def writeDistance(face_Dict):
 	count = 1
 	print "Now get image_encoding then write 2 file..."
+	# f = open("faceEncoding","w")
+	f_inner = open("disInner.txt","w")
+	f_outter = open("disOutter.txt","w")
 	for faceKey in face_Dict:
 		print 'now calc No.%d, %s' %(count,faceKey)
 		image1 = face_recognition.load_image_file("../../data/shrinkLFW/" + face_Dict[faceKey][0])
@@ -40,17 +43,42 @@ def writeEncodings(face_Dict):
 		length2 = len(face_recognition.face_encodings(image2))
 
 		if (length1 == 0 and length2 != 0):
-			image1_encoding = zeros(128)
+			# print "if!"
+			image1_encoding = ones(128) * 100
 			image2_encoding = face_recognition.face_encodings(image2)[0]
 		elif (length2 == 0 and length1 != 0):
+			# print "elif!"
 			image1_encoding = face_recognition.face_encodings(image1)[0]
-			image2_encoding = zeros(128)
+			image2_encoding = ones(128) * 100
 		else:
+			# print "else!"
 			image1_encoding = face_recognition.face_encodings(image1)[0]
 			image2_encoding = face_recognition.face_encodings(image2)[0]
+		
+		image1_encoding = [image1_encoding]
+		# image2_encoding = [image2_encoding]
+		face_distance = face_recognition.face_distance(image1_encoding,image2_encoding)
+		face_distance = str(face_distance[0])
+		f_inner.write(face_distance + " ")
+
+		for faceInner in face_Dict:
+			
+			image_compare = face_recognition.load_image_file("../../data/shrinkLFW/" + face_Dict[faceInner][1])
+
+			length_compare = len(face_recognition.face_encodings(image_compare))
+
+			if length_compare == 0:
+				compare_image_encoding = ones(128) * 100
+			else:
+				compare_image_encoding = face_recognition.face_encodings(image_compare)[0]
+			
+			face_distance_out = face_recognition.face_distance(image1_encoding,compare_image_encoding)
+			f_outter.write(str(face_distance_out[0]) + " ")
+		f_outter.write("\n")
+		count = count + 1
 		# print image1_encoding
-		# print image2_encoding
-		f = open("faceEncoding.txt","a")
+		# print compare_image2_encoding
+		'''
 		for element in image1_encoding:
 			element_str = str(element)
 			f.write(element_str + " ")
@@ -61,7 +89,25 @@ def writeEncodings(face_Dict):
 		f.write("\n")
 		count = count + 1
 		f.close()
+		'''
+	f_outter.close()
+	f_inner.close()
 
+def readDistance():
+	f_inner_read = open("disInner.txt","r")
+	f_outter_read = open("disOutter.txt","r")
+
+	disLine = f_inner_read.readline()
+	while disLine_inner:
+		disList_inner = disLine_inner.split()
+		disList_inner = disList_inner[:128]
+
+	inner_times = len(disList)
+
+	for inner_dis in disList_inner:
+			
+
+'''
 def getDistance():
 	encodingMat = []
 	encodeFile = open("faceEncoding.txt","r")
@@ -76,19 +122,21 @@ def getDistance():
 	# print len(encodingMat[0])
 
 	innerDis_list = []
-
+	# print type(array(encodingMat[0]))
+	
 	for i in range(len(encodingMat) - 1):
-		attr1 = [encodingMat[i]]
-		attr2 = [encodingMat[i+1]]
+		attr1 = array(encodingMat[i])
+		attr2 = array(encodingMat[i+1])
 		inner_face_distance = face_recognition.face_distance(attr1,attr2)
 		innerDis_list.append(inner_face_distance[0])
 
 	print innerDis_list
-
+'''
 
 def execute():
 	faceDict = file2dict()
-	writeEncodings(faceDict)
+	writeDistance(faceDict)
+	# writeEncodings(faceDict)
 # clac inner class
 '''
 count = 0
